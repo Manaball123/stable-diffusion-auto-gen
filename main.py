@@ -12,7 +12,8 @@ payload = {
     "steps" : cfg.steps,
     "width" : cfg.width,
     "height" : cfg.height,
-    "batch-size" : cfg.batch_size
+    "batch-size" : cfg.batch_size,
+    "cfg_scale" : cfg.cfg_scale
 }
 
 #simple wrapper
