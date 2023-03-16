@@ -3,6 +3,7 @@ import base64
 import os
 import time
 import cfg
+import random
 
 
 payload = {
@@ -28,6 +29,16 @@ def save_image(data : bytes):
     with open(fname, "wb+") as f:
         f.write(data)
     
+def concat_prompts(selection : list):
+    out : str = ""
+    
+    for v in selection:
+        out += ", "
+        out += v
+    
+    return out
+        
+    
 
 def mkdir():
     if(not os.path.isdir(cfg.root_dir)):
@@ -39,6 +50,10 @@ def main():
     ctr : int = 0
     while(not stop_generation):
         #thx 2 the webui github docs thingy
+        if(cfg.add_random_prompts):
+            prompt_str = concat_prompts(random.sample(cfg.random_prompts, cfg.random_n))
+            payload["prompt"] = cfg.prompt + prompt_str
+
         resp = requests.post(url=f'{cfg.url}/sdapi/v1/txt2img', json = payload)
         if(resp.status_code != 200):
             log("Request failed. Retrying...")
