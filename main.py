@@ -10,7 +10,8 @@ payload = {
     "negative_prompt" : cfg.negative_prompt,
     "steps" : cfg.steps,
     "width" : cfg.width,
-    "height" : cfg.height
+    "height" : cfg.height,
+    "batch-size" : cfg.batch_size
 }
 
 #simple wrapper
