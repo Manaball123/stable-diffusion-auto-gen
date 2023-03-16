@@ -10,7 +10,7 @@ no_gen_limit = True
 
 
 #ok so its indexed in image%100
-split_dirs = False
+split_dirs = True
 split_to : int = 100
 
 #self explanatory

@@ -23,7 +23,10 @@ def log(v):
 
 def get_fname():
     id = time.time_ns() // 100
-    subdir = cfg.root_dir + str(id % 100) + "/"
+    if(cfg.split_dirs):
+        subdir = cfg.root_dir + str(id % 100) + "/"
+    else:
+        subdir = cfg.root_dir
     return subdir + str(id) + ".png"
 
 def save_image(data : bytes):
