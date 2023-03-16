@@ -22,10 +22,12 @@ def log(v):
         print(v)
 
 def get_fname():
-    return str(time.time_ns())
+    id = time.time_ns() // 100
+    subdir = cfg.root_dir + str(id % 100) + "/"
+    return subdir + str(id) + ".png"
 
 def save_image(data : bytes):
-    fname : str = cfg.root_dir + get_fname() + ".png"
+    fname : str = get_fname()
     log("Saving " + fname)
     with open(fname, "wb+") as f:
         f.write(data)
@@ -44,6 +46,10 @@ def concat_prompts(selection : list):
 def mkdir():
     if(not os.path.isdir(cfg.root_dir)):
         os.mkdir(cfg.root_dir)
+    for i in range(0, cfg.split_to):
+        cdir = cfg.root_dir + str(i)
+        if(not os.path.isdir(cdir)):
+            os.mkdir(cdir)
 
 def main():
     stop_generation : bool = False
