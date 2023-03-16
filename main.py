@@ -3,7 +3,7 @@ import base64
 import os
 import time
 import cfg
-from PIL import Image, PngImagePlugin
+
 
 payload = {
     "prompt" : cfg.prompt,

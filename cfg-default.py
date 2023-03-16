@@ -18,7 +18,7 @@ print_logs = True
 #generation configs
 steps : int = 20
 prompt : str = ""
-negative_prompt : str = "poorly drawn,((bad anatomy)),bad,blurry,text,missing fingers,low quality,error,signature,normal quality,cropped,username,watermark,fewer digits,worst quality,extra digit,lowres,jpeg artifacts,bad feet,disfigured,long neck,ugly,mutation,malformed,bad proportions,duplicate,font,extra legs,more than 2 nipples,extra limbs,morbid,long body"
+negative_prompt : str = ""
 
 #larger ones sometimes look hideous even when u add those negative stuff
 width = 512
