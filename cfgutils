@@ -1,0 +1,18 @@
+
+#randomize prompts in this table
+class RandTable:
+    def __init__(self, elements : list, elements_n : int, def_weight : float = base_weight, lock_weights : bool = False) -> None:
+        """
+        elements: prompts in table
+        elements_n: number of prompts to use
+        def_weight: base prompt weight for every prompt, note that overrides will still work
+        
+        """
+        self.elements = elements
+        self.elements_n = elements_n
+        self.base_weight = def_weight
+        self.norand = lock_weights
+        
+        return
+    def get_rand_elements() -> list:
+        return

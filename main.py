@@ -4,6 +4,7 @@ import os
 import time
 import cfg
 import random
+import numpy as np
 
 
 payload = {
@@ -43,12 +44,33 @@ def concat_prompts(selection : list):
         out += v
     
     return out
+
+
+
+
+
+def parse_cfg_prompts(prompts : list) -> str:
+    out : str = ""
+    for prompt in prompts:
+        if(isinstance(prompt, str)):
+            out += prompt
+        elif(isinstance(prompt, list)):
+            start_offset = cfg.starting_offset
+            if(len(prompt) == 2):
+                start_offset = prompt[1]
+            
+            if(len(prompt) == 3):
+
+
         
     
 
 def mkdir():
     if(not os.path.isdir(cfg.root_dir)):
         os.mkdir(cfg.root_dir)
+    if(not cfg.split_dirs):
+        return
+    
     for i in range(0, cfg.split_to):
         cdir = cfg.root_dir + str(i)
         if(not os.path.isdir(cdir)):
