@@ -3,11 +3,10 @@ import base64
 import os
 import time
 import cfg
-import random
 import numpy as np
 import utils
 
-payload = {
+gen_payload = {
     "prompt" : "",
     "negative_prompt" : cfg.negative_prompt,
     "steps" : cfg.steps,
@@ -15,6 +14,10 @@ payload = {
     "height" : cfg.height,
     "batch-size" : cfg.batch_size,
     "cfg_scale" : cfg.cfg_scale
+}
+
+upscale_payload = {
+
 }
 
 #simple wrapper
@@ -58,10 +61,10 @@ def main():
         for v in cfg.prompt_list:
             prompts += utils.parse_element(v)
 
-        payload["prompt"] = prompts
+        gen_payload["prompt"] = prompts
         log("Generating with prompts: " + prompts)
         #thx 2 the webui github docs thingy
-        resp = requests.post(url=f'{cfg.url}/sdapi/v1/txt2img', json = payload)
+        resp = requests.post(url=f'{cfg.url}/sdapi/v1/txt2img', json = gen_payload)
         if(resp.status_code != 200):
             log("Request failed. Retrying...")
             continue
@@ -70,6 +73,9 @@ def main():
         resp_obj = resp.json()
         
         for v in resp_obj["images"]:
+            if(cfg.upscale_image):
+                pass
+            
             image = base64.b64decode(v)
             save_image(image)
         if(cfg.no_gen_limit == False):
@@ -77,9 +83,11 @@ def main():
             if(ctr >= cfg.images_n):
                 log("Generated sufficient images. Terminating...")
                 return
-                    
-            
+              
         
-    return 
+    return
+
+
+
 if __name__ == "__main__":
     main()

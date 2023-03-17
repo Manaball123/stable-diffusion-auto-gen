@@ -1,6 +1,7 @@
 import cfg
 import numpy as np
 import random
+import cfgutils
 
 def rand_weight(base : float = cfg.base_weight) -> float:
     if(cfg.normally_distributed):
@@ -15,13 +16,33 @@ def create_weighted_tag(prompt : str, weight : float) -> str:
 #pass in string OR prompt element(list)
 def create_prompt(prompt, base_weight : float = cfg.base_weight, norand_weights : bool = False) -> str:
     
-    
+    weight = 1.0
     prompt_str = ""
 
     #if prompt is a string
     if(isinstance(prompt, str)):
         #use a random weight
         prompt_str = prompt
+    
+    
+    #if its a LORA
+    if(isinstance(prompt, cfgutils.LORA)):
+        #check for overrides
+        if(prompt.weight != None):
+            base_weight = prompt.weight
+        
+        if(prompt.norand != True):
+            weight = rand_weight(base_weight)
+        else:
+            weight = base_weight
+        #generate lora prompt first
+        out = prompt.lora_tostr(weight)
+        out += ", "
+        for v in prompt.bundled_tags:
+            out += create_prompt(v, base_weight, prompt.norand)
+        return out
+
+    
     
     #if prompt is a prompt element
     if(isinstance(prompt, list)):
@@ -31,10 +52,12 @@ def create_prompt(prompt, base_weight : float = cfg.base_weight, norand_weights 
             norand_weights = True
             base_weight = prompt[1]
     
-    assert(len(prompt_str) != 0)
+    #assert(len(prompt_str) != 0)
     if(not norand_weights):
-        base_weight = rand_weight(base_weight)
-    return create_weighted_tag(prompt_str, base_weight)
+        weight = rand_weight(base_weight)
+    else:
+        weight = base_weight
+    return create_weighted_tag(prompt_str, weight)
 
 
 
@@ -43,13 +66,37 @@ def create_prompt(prompt, base_weight : float = cfg.base_weight, norand_weights 
 def parse_element(element) -> str:
     #honestly i could customize weight randrange for randtables too but lazy
     
-    if(isinstance(element, cfg.RandTable)):
+    if(isinstance(element, cfgutils.RandTable)):
         #if randtable
         out : str = ""
         elements = element.get_rand_elements()
         for v in elements:
-            out += create_prompt(v, element.base_weight, element.norand)
+            if(isinstance(v, str)):
+                elist : list = [v, element.base_weight]
+                if(element.norand):
+                    elist.append(cfgutils.NORAND)
+                out += parse_element(elist)
+                continue
+
+            out += parse_element(v)
         return out
+    
+    if(isinstance(element, cfgutils.RandElement)):
+        if(element.trigger()):
+            return parse_element(element.element)
+        return ""
+    
+    #if bundle
+    if(isinstance(element, cfgutils.ElementBundle)):
+        out : str = ""
+        #for VALUE in CONTENTS of BUNDLE
+        for v in element.elements:
+            out += parse_element(v)
+    
+    #if unmodified list
+    if(isinstance(element, cfgutils.UnmodifiedList)):
+        return element.get_str()
+    
     #else parse as normal
     return create_prompt(element)
 
