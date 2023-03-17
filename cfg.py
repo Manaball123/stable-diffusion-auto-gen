@@ -1,5 +1,4 @@
-
-
+import random
 #other shit
 url : str = "http://127.0.0.1:7860"
 root_dir : str = "./generated-images/"
@@ -22,8 +21,7 @@ cfg_scale = 10
 #generation configs
 steps : int = 20
 positive_prompts : str = "huge filesize , ultra-detailed, highres, extremely detailed, (((best quality))) ,(((masterpiece)))"
-#concats tags automatically
-prompt : str = positive_prompts + "(nsfw), sweat, feet, toes, cum on body, cum in pussy, cum pool, breast out, (((multiple girls))), pussy, nipples, puffed nipples, (small breasts), skinny, heavy breathing, cute, ((sex)), looking at viewer, blush, long hair, open mouth, breasts, "#1boy, penis
+
 
 #to override bias add element in format
 #["tag", bias : int]
@@ -40,7 +38,7 @@ randomize_tag_weight : bool = True
 #base weight, can be overridden
 base_weight : float = 1.0
 #this is treated as the standard deviation if weight is normally distrubuted
-max_tag_weight_offset : float = 1.0
+max_tag_weight_offset : float = 0.2
 normally_distributed : bool = True
 add_random_prompts : bool = True
 
@@ -54,21 +52,31 @@ height = 728
 #actually this thing doesnt actually matter i think
 batch_size = 1
 
+#ignore this thing ig
+#randomize prompts in this table
+class RandTable:
+    def __init__(self, elements : list, elements_n : int, def_weight : float = base_weight, lock_weights : bool = False) -> None:
+        """
+        elements: prompts in table
+        elements_n: number of prompts to use
+        def_weight: base prompt weight for every prompt, note that overrides will still work
+        
+        """
+        self.elements = elements
+        self.elements_n = elements_n
+        self.base_weight = def_weight
+        self.norand = lock_weights
+        
+        return
+    def get_rand_elements(self) -> list:
+        return random.sample(self.elements, self.elements_n)
 
-random_prompts : list = [
-    "red hair",
-    "blue hair",
-    "black hair",
-    "blond hair",
-    "white hair",
-    #why rainbow hair never work :(
-    "((rainbow hair))"
-]
-random_n : int = 1
+
 
 
 prompt_list : list = [
-    ["nsfw", 3.0, NORAND],
+    [positive_prompts, 1.1, NORAND],
+    ["nsfw", 1.2, NORAND],
     "sweat",
     "feet",
     "toes",
@@ -76,7 +84,7 @@ prompt_list : list = [
     "cum in pussy",
     "cum pool",
     "breast out",
-    ["multiple girls", 3.0, NORAND],
+    ["multiple girls", 1.3, NORAND],
     "pussy",
     "nipples",
     "puffed nipples",
@@ -84,7 +92,7 @@ prompt_list : list = [
     "skinny",
     "heavy breathing",
     "cute",
-    ["sex", 2.0],
+    ["sex", 1.3],
     "looking at viewer",
     "blush",
     "long hair",
@@ -96,8 +104,8 @@ prompt_list : list = [
     "black hair",
     "blond hair",
     "white hair",
-    ["rainbow hair", 2.0]
-    ], 1, 1.0, True),
+    ["rainbow hair", 1.3],
+    ], 1, 1.2, True),
 
 
 

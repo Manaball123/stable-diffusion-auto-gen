@@ -13,29 +13,45 @@ def create_weighted_tag(prompt : str, weight : float) -> str:
     return "(" + prompt + ":" + str(weight) + "), "
 
 #pass in string OR prompt element(list)
-def create_prompt(prompt, base_weight : float = cfg.base_weight) -> str:
+def create_prompt(prompt, base_weight : float = cfg.base_weight, norand_weights : bool = False) -> str:
     
-    #if prompt is a string
+    
+    prompt_str = ""
 
+    #if prompt is a string
     if(isinstance(prompt, str)):
         #use a random weight
-        return create_weighted_tag(prompt, rand_weight(base_weight))
+        prompt_str = prompt
+    
     #if prompt is a prompt element
     if(isinstance(prompt, list)):
-        #if no norand modifier 
-        if(len(prompt) == 2):
-            return create_weighted_tag(prompt[0], rand_weight(prompt[1]))
-        #assuming its one with norand
-        else:
-            return create_weighted_tag(prompt, prompt[1])
+        prompt_str = prompt[0]
+        #if norand modifier
+        if(len(prompt) == 3 or norand_weights):
+            norand_weights = True
+            base_weight = prompt[1]
     
-    raise("what the fuck did u pass in here")
+    assert(len(prompt_str) != 0)
+    if(not norand_weights):
+        base_weight = rand_weight(base_weight)
+    return create_weighted_tag(prompt_str, base_weight)
 
-        
+
 
 
 #parses ANY element in the prompt list and returns string version
-def parse_element(element):
-    if()
+def parse_element(element) -> str:
+    #honestly i could customize weight randrange for randtables too but lazy
+    
+    if(isinstance(element, cfg.RandTable)):
+        #if randtable
+        out : str = ""
+        elements = element.get_rand_elements()
+        for v in elements:
+            out += create_prompt(v, element.base_weight, element.norand)
+        return out
+    #else parse as normal
+    return create_prompt(element)
+
     
     

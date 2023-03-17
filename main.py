@@ -5,10 +5,10 @@ import time
 import cfg
 import random
 import numpy as np
-
+import utils
 
 payload = {
-    "prompt" : cfg.prompt,
+    "prompt" : "",
     "negative_prompt" : cfg.negative_prompt,
     "steps" : cfg.steps,
     "width" : cfg.width,
@@ -36,34 +36,7 @@ def save_image(data : bytes):
     with open(fname, "wb+") as f:
         f.write(data)
     
-def concat_prompts(selection : list):
-    out : str = ""
-    
-    for v in selection:
-        out += ", "
-        out += v
-    
-    return out
 
-
-
-
-
-def parse_cfg_prompts(prompts : list) -> str:
-    out : str = ""
-    for prompt in prompts:
-        if(isinstance(prompt, str)):
-            out += prompt
-        elif(isinstance(prompt, list)):
-            start_offset = cfg.starting_offset
-            if(len(prompt) == 2):
-                start_offset = prompt[1]
-            
-            if(len(prompt) == 3):
-
-
-        
-    
 
 def mkdir():
     if(not os.path.isdir(cfg.root_dir)):
@@ -81,11 +54,13 @@ def main():
     mkdir()
     ctr : int = 0
     while(not stop_generation):
-        #thx 2 the webui github docs thingy
-        if(cfg.add_random_prompts):
-            prompt_str = concat_prompts(random.sample(cfg.random_prompts, cfg.random_n))
-            payload["prompt"] = cfg.prompt + prompt_str
+        prompts : str = ""
+        for v in cfg.prompt_list:
+            prompts += utils.parse_element(v)
 
+        payload["prompt"] = prompts
+        log("Generating with prompts: " + prompts)
+        #thx 2 the webui github docs thingy
         resp = requests.post(url=f'{cfg.url}/sdapi/v1/txt2img', json = payload)
         if(resp.status_code != 200):
             log("Request failed. Retrying...")
