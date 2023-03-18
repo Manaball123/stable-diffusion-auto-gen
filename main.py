@@ -89,6 +89,8 @@ def main():
     stop_generation : bool = False
     mkdir()
     ctr : int = 0
+    #interrupt whatever it is that its currently doing
+    requests.post(url=f'{cfg.url}/sdapi/v1/interrupt')
     #u can actually send an interrupt request here
     while(not stop_generation):
         prompts : str = ""

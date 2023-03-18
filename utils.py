@@ -99,6 +99,7 @@ def parse_element(element) -> str:
         #for VALUE in CONTENTS of BUNDLE
         for v in element.elements:
             out += parse_element(v)
+        return out
     
     #if unmodified list
     if(isinstance(element, cfgutils.UnmodifiedList)):
