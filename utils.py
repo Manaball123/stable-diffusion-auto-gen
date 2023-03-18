@@ -120,3 +120,8 @@ def gen_seed() -> int:
 def mkdir_if_not_exist(dir : str):
     if(not os.path.isdir(dir)):
         os.mkdir(dir)
+    
+def mk_subdirs(root : str):
+    for i in range(0, cfg.split_to):
+        mkdir_if_not_exist(root + str(i))
+        

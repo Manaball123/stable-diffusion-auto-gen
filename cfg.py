@@ -3,6 +3,8 @@ from cfgutils import *
 url : str = "http://127.0.0.1:7860"
 root_dir : str = "./generated-data/"
 img_dir : str = root_dir + "images/"
+img_orig_dir : str = img_dir + "original/"
+img_ups_dir : str = img_dir + "upscaled/"
 metadata_dir : str = root_dir + "metadata/"
 
 #self explanatory

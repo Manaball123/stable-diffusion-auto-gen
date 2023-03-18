@@ -48,9 +48,9 @@ def get_fname(id : int, dir : str, ext : str, app_str : str = ""):
         subdir = dir
     return subdir + str(id) + app_str + ext
 
-def save_image(data : bytes, id : int, app_str : str = ""):
+def save_image(data : bytes, id : int, subdir : str = ""):
     
-    fname : str = get_fname(id, cfg.img_dir, ".png", app_str)
+    fname : str = get_fname(id, cfg.img_dir + subdir, ".png")
     log("Saving " + fname)
     with open(fname, "wb+") as f:
         f.write(data)
@@ -71,16 +71,15 @@ def save_metadata(id : int):
 def mkdir():
     utils.mkdir_if_not_exist(cfg.root_dir)
     utils.mkdir_if_not_exist(cfg.img_dir)
+    utils.mkdir_if_not_exist(cfg.img_orig_dir)
+    utils.mkdir_if_not_exist(cfg.img_ups_dir)
     utils.mkdir_if_not_exist(cfg.metadata_dir)
     if(not cfg.split_dirs):
         return
     
-    for i in range(0, cfg.split_to):
-        idir = cfg.img_dir + str(i)
-        mdir = cfg.metadata_dir + str(i)
-        utils.mkdir_if_not_exist(idir)
-        utils.mkdir_if_not_exist(mdir)
-
+    utils.mk_subdirs(cfg.img_orig_dir)
+    utils.mk_subdirs(cfg.img_ups_dir)
+    
         
     
 
@@ -115,7 +114,7 @@ def main():
             
             image = base64.b64decode(v)
             id = time.time_ns() // 100
-            save_image(image, id, "-original")
+            save_image(image, id, "original/")
             if(cfg.upscale_image):
                 upscale_payload["image"] = v
                 upscale_resp = requests.post(url = f"{cfg.url}/sdapi/v1/extra-single-image", json = upscale_payload)
@@ -125,7 +124,7 @@ def main():
                     upscale_obj = upscale_resp.json()
                     v_upscaled = upscale_obj["image"]
                     image_upscaled = base64.b64decode(v_upscaled)
-                    save_image(image_upscaled, id, "-upscaled")
+                    save_image(image_upscaled, id, "upscaled/")
                 #clear upscale image payload
                 upscale_payload['image'] = "(omitted)"
             save_metadata(id)
