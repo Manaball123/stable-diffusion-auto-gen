@@ -21,7 +21,7 @@ print_logs = True
 
 cfg_scale = 10
 #generation configs
-steps : int = 64
+steps : int = 32
 positive_prompts : list = [
     "huge filesize" , 
     "ultra-detailed", 
