@@ -3,7 +3,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-generated-images
+generated-data
 
 
 # C extensions

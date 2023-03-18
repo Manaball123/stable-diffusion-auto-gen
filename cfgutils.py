@@ -27,7 +27,7 @@ class UnmodifiedList:
         out : str = ""
         for v in self.elements:
             out += v
-            out += ","
+            out += ", "
         return out
 
 #Note that you can put this inside a rand table

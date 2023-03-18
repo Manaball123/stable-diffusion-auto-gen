@@ -1,7 +1,9 @@
 from cfgutils import *
 #other shit
 url : str = "http://127.0.0.1:7860"
-root_dir : str = "./generated-images/"
+root_dir : str = "./generated-data/"
+img_dir : str = root_dir + "images/"
+metadata_dir : str = root_dir + "metadata/"
 
 #self explanatory
 images_n = 100
@@ -19,7 +21,7 @@ print_logs = True
 
 cfg_scale = 10
 #generation configs
-steps : int = 20
+steps : int = 50
 positive_prompts : list = [
     "huge filesize" , 
     "ultra-detailed", 
@@ -29,6 +31,7 @@ positive_prompts : list = [
     "(masterpiece:1.3)"
 ]
 
+sampler_name = "DPM++ 2M Karras"
 
 #to override bias add element in format
 #["tag", bias : int]
@@ -43,14 +46,18 @@ randomize_tag_weight : bool = True
 #base weight, can be overridden
 base_weight : float = 1.0
 #this is treated as the standard deviation if weight is normally distrubuted
-max_tag_weight_offset : float = 0.15
+max_tag_weight_offset : float = 0.1
 normally_distributed : bool = True
 add_random_prompts : bool = True
 
 #larger ones sometimes look hideous even when u add those +-
 # ngative stuff
-width = 1024
-height = 768
+
+
+#width = 1024; height = 768
+width = 512; height = 512
+#width = 640; height = 1024
+#width = 1024; height = 1024
 #u prob should set this to 1, dont think it matters that much tbh
 #ok nvm after some rough testing, higher batch does speed it up
 #just dont make it exceed ur vram size
@@ -58,6 +65,11 @@ height = 768
 batch_size = 1
 
 upscale_image = True
+upscale_w = 1024; upscale_h = 1024
+upscaling_resize = 4
+upscaler_1 = "R-ESRGAN 4x+"
+upscaler_2 = "None"
+
 
 #list of prompts for generation
 prompt_list : list = [
@@ -98,13 +110,14 @@ prompt_list : list = [
     "white hair",
     ["rainbow hair", 1.3],
     ], 1, 1.2, True),
-
+    RandElement(LORA("ahegao_v1", 1.2, True, ["ahegao", "rolling eyes", "tongue out", "saliva", "drooling"]), 0.1),
+    #LORA("lucyCyberpunk_35Epochs", 0.8, True, ["lucy \(cyberpunk\), 1girl, arm up, asymmetrical hair, belt, bodysuit, covered mouth, covered navel, detached sleeves, grey eyes, hip vent, holding, holding weapon, looking at viewer, night, night sky, pouch, short hair, sky, solo, weapon, white hair, wire, short shorts, shorts, open jacket,", ["robot joints", 0.5, NORAND]]),
     RandTable([
     "on side",
     "spread legs",
     "lying",
-    LORA("povSquattingCowgirlLora_pscowgirl", 1.3, bundled_tags = ["squatting cowgirl"]),
-    LORA("grabbingOwnAss_v1Pruned", 1.3, bundled_tags = ["grabbing own ass"])
+    LORA("povSquattingCowgirlLora_pscowgirl", 1, bundled_tags = [["squatting cowgirl, cowgirl", 1.2, NORAND]]),
+    LORA("grabbingOwnAss_v1", 1.3, bundled_tags = ["grabbing own ass", "ass spread", "ass stretch"])
     ], 1, 1.2, True),
     #["stockings", 1.5]
 ]

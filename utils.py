@@ -2,6 +2,7 @@ import cfg
 import numpy as np
 import random
 import cfgutils
+import os
 
 def rand_weight(base : float = cfg.base_weight) -> float:
     if(cfg.normally_distributed):
@@ -24,25 +25,7 @@ def create_prompt(prompt, base_weight : float = cfg.base_weight, norand_weights 
         #use a random weight
         prompt_str = prompt
     
-    
-    #if its a LORA
-    if(isinstance(prompt, cfgutils.LORA)):
-        #check for overrides
-        if(prompt.weight != None):
-            base_weight = prompt.weight
-        
-        if(prompt.norand != True):
-            weight = rand_weight(base_weight)
-        else:
-            weight = base_weight
-        #generate lora prompt first
-        out = prompt.lora_tostr(weight)
-        out += ", "
-        for v in prompt.bundled_tags:
-            out += create_prompt(v, base_weight, prompt.norand)
-        return out
 
-    
     
     #if prompt is a prompt element
     if(isinstance(prompt, list)):
@@ -62,24 +45,48 @@ def create_prompt(prompt, base_weight : float = cfg.base_weight, norand_weights 
 
 
 
-#parses ANY element in the prompt list and returns string version
-def parse_element(element) -> str:
-    #honestly i could customize weight randrange for randtables too but lazy
-    
-    if(isinstance(element, cfgutils.RandTable)):
+
+def parse_LORA(lora_e : cfgutils.LORA) -> str:
+    #check for overrides
+    if(lora_e.weight != None):
+            base_weight = lora_e.weight
+        
+    if(lora_e.norand != True):
+        weight = rand_weight(base_weight)
+    else:
+        weight = base_weight
+    #generate lora prompt first
+    out = lora_e.lora_tostr(weight)
+    out += ", "
+    for v in lora_e.bundled_tags:
+        out += create_prompt(v, base_weight, lora_e.norand)
+
+        #out += create_prompt(v, base_weight, prompt.norand)
+    return out
+
+def parse_RandTable(tab_e : cfgutils.RandTable) -> str:
         #if randtable
         out : str = ""
-        elements = element.get_rand_elements()
+        elements = tab_e.get_rand_elements()
         for v in elements:
             if(isinstance(v, str)):
-                elist : list = [v, element.base_weight]
-                if(element.norand):
+                elist : list = [v, tab_e.base_weight]
+                if(tab_e.norand):
                     elist.append(cfgutils.NORAND)
                 out += parse_element(elist)
                 continue
 
             out += parse_element(v)
         return out
+
+
+
+#parses ANY element in the prompt list and returns string version
+def parse_element(element) -> str:
+    #honestly i could customize weight randrange for randtables too but lazy
+    
+    if(isinstance(element, cfgutils.RandTable)):
+        return parse_RandTable(element)
     
     if(isinstance(element, cfgutils.RandElement)):
         if(element.trigger()):
@@ -96,9 +103,19 @@ def parse_element(element) -> str:
     #if unmodified list
     if(isinstance(element, cfgutils.UnmodifiedList)):
         return element.get_str()
-    
+    #if its a LORA
+    if(isinstance(element, cfgutils.LORA)):
+        return parse_LORA(element)
+
     #else parse as normal
     return create_prompt(element)
 
     
-    
+
+def gen_seed() -> int:
+    #2^63 - 1
+    return random.randint(0,9223372036854775808)
+
+def mkdir_if_not_exist(dir : str):
+    if(not os.path.isdir(dir)):
+        os.mkdir(dir)
