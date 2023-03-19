@@ -17,8 +17,15 @@ gen_payload = {
     "batch_size" : cfg.batch_size,
     "cfg_scale" : cfg.cfg_scale,
     "sampler_name" : cfg.sampler_name,
+    "enable_hr" : cfg.enable_hr,
+    "hr_scale" : cfg.hr_scale,
+    "hr_upscaler" : cfg.hr_upscaler,
+    "denoising_strength" : cfg.hr_denoise_strength,
+    "hr_second_pass_steps" : cfg.hr_steps,
     "seed" : -1
 }
+
+current_pnginfo = ""
 
 
 
@@ -45,7 +52,8 @@ def save_image(data : bytes, id : int):
 
 def save_metadata(id : int):
     data = {
-        "gen_payload" : gen_payload
+        "gen_payload" : gen_payload,
+        "png_info" : current_pnginfo
     }
     fname : str = get_fname(id, cfg.metadata_dir, ".json")
     with open(fname, "w") as f:
@@ -97,10 +105,16 @@ def main():
         
             image = base64.b64decode(v)
             id = time.time_ns() // 100
-            save_image(image, id, "original/")
-            if(cfg.upscale_image):
-                pass
+            save_image(image, id)
+
+            pnginfo_resp = requests.post(url = f'{cfg.url}/sdapi/v1/png-info', json={"image" : v})
+            if(pnginfo_resp.status_code != 200):
+                log("PNGInfo request failed.")
+                current_pnginfo = ""
+            else:
+                current_pnginfo = pnginfo_resp.json()["image"]
             save_metadata(id)
+            
         if(cfg.no_gen_limit == False):
             ctr += 1
             if(ctr >= cfg.images_n):

@@ -54,9 +54,9 @@ add_random_prompts : bool = True
 # ngative stuff
 
 
-width = 1024; height = 768
+#width = 1024; height = 768
 #width = 2048; height = 1536
-#width = 512; height = 512
+width = 512; height = 512
 #width = 768; height = 512
 #width = 640; height = 1024
 #width = 1024; height = 1024
@@ -67,12 +67,19 @@ width = 1024; height = 768
 batch_size = 1
 
 #you get NO postprocessed upscaling, fuck you
+"""
 upscale_image = True
 upscale_w = 1024; upscale_h = 1024
 upscaling_resize = 4
 upscaler_1 = "R-ESRGAN 4x+"
 upscaler_2 = "None"
+"""
 
+enable_hr = True
+hr_scale = 2
+hr_upscaler = "R-ESRGAN 4x+"
+hr_denoise_strength = 0.7
+hr_steps = 10
 
 #list of prompts for generation
 prompt_list : list = [
@@ -120,7 +127,7 @@ prompt_list : list = [
     "spread legs",
     "lying",
     LORA("povSquattingCowgirlLora_pscowgirl", 1, bundled_tags = [["squatting cowgirl, cowgirl", 1.2, NORAND]]),
-    LORA("grabbingOwnAss_v1", 1.3, bundled_tags = ["grabbing own ass", "ass spread", "ass stretch"])
+    LORA("grabbingOwnAss_v1", 1, bundled_tags = ["grabbing own ass", "ass spread", "ass stretch"])
     ], 1, 1.2, True),
     #["stockings", 1.5]
 ]
