@@ -6,6 +6,8 @@ import cfg
 import numpy as np
 import utils
 import json
+
+#I know this is saved in the image data and stuff, but I'm still saving this because u can get the same image by sending the same json
 gen_payload = {
     "prompt" : "",
     "negative_prompt" : cfg.negative_prompt,
@@ -18,22 +20,7 @@ gen_payload = {
     "seed" : -1
 }
 
-upscale_payload = {
-  "resize_mode": 0,
-  "show_extras_results": True,
-  "gfpgan_visibility": 0,
-  "codeformer_visibility": 0,
-  "codeformer_weight": 0,
-  "upscaling_resize": cfg.upscaling_resize,
-#  "upscaling_resize_w": 512,
-#  "upscaling_resize_h": 512,
-  "upscaling_crop": True,
-  "upscaler_1": cfg.upscaler_1,
-  "upscaler_2": cfg.upscaler_2,
-  "extras_upscaler_2_visibility": 0,
-  "upscale_first": False,
-  "image": ""
-}
+
 
 #simple wrapper
 def log(v):
@@ -48,9 +35,9 @@ def get_fname(id : int, dir : str, ext : str, app_str : str = ""):
         subdir = dir
     return subdir + str(id) + app_str + ext
 
-def save_image(data : bytes, id : int, subdir : str = ""):
+def save_image(data : bytes, id : int):
     
-    fname : str = get_fname(id, cfg.img_dir + subdir, ".png")
+    fname : str = get_fname(id, cfg.img_dir, ".png")
     log("Saving " + fname)
     with open(fname, "wb+") as f:
         f.write(data)
@@ -60,8 +47,6 @@ def save_metadata(id : int):
     data = {
         "gen_payload" : gen_payload
     }
-    if(cfg.upscale_image):
-        data["upscale_payload"] = upscale_payload
     fname : str = get_fname(id, cfg.metadata_dir, ".json")
     with open(fname, "w") as f:
         f.write(json.dumps(data, indent=1))
@@ -71,14 +56,13 @@ def save_metadata(id : int):
 def mkdir():
     utils.mkdir_if_not_exist(cfg.root_dir)
     utils.mkdir_if_not_exist(cfg.img_dir)
-    utils.mkdir_if_not_exist(cfg.img_orig_dir)
-    utils.mkdir_if_not_exist(cfg.img_ups_dir)
+
     utils.mkdir_if_not_exist(cfg.metadata_dir)
     if(not cfg.split_dirs):
         return
     
-    utils.mk_subdirs(cfg.img_orig_dir)
-    utils.mk_subdirs(cfg.img_ups_dir)
+    utils.mk_subdirs(cfg.metadata_dir)
+    utils.mk_subdirs(cfg.img_dir)
     
         
     
@@ -110,23 +94,12 @@ def main():
         resp_obj = resp.json()
         
         for v in resp_obj["images"]:
-            
-            
+        
             image = base64.b64decode(v)
             id = time.time_ns() // 100
             save_image(image, id, "original/")
             if(cfg.upscale_image):
-                upscale_payload["image"] = v
-                upscale_resp = requests.post(url = f"{cfg.url}/sdapi/v1/extra-single-image", json = upscale_payload)
-                if(upscale_resp.status_code != 200):
-                    log("Upscaling request failed. Proceeding without upscaling...")
-                else:
-                    upscale_obj = upscale_resp.json()
-                    v_upscaled = upscale_obj["image"]
-                    image_upscaled = base64.b64decode(v_upscaled)
-                    save_image(image_upscaled, id, "upscaled/")
-                #clear upscale image payload
-                upscale_payload['image'] = "(omitted)"
+                pass
             save_metadata(id)
         if(cfg.no_gen_limit == False):
             ctr += 1
