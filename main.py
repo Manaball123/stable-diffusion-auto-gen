@@ -77,6 +77,7 @@ def mkdir():
 
 
 def main():
+    global current_pnginfo
     stop_generation : bool = False
     mkdir()
     ctr : int = 0
@@ -112,7 +113,7 @@ def main():
                 log("PNGInfo request failed.")
                 current_pnginfo = ""
             else:
-                current_pnginfo = pnginfo_resp.json()["image"]
+                current_pnginfo = pnginfo_resp.json()["info"]
             save_metadata(id)
             
         if(cfg.no_gen_limit == False):

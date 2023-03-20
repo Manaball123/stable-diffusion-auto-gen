@@ -1,4 +1,14 @@
 import random
+
+
+#base weight, norand
+class ElementTraits:
+    def __init__(self, base_weight : float, norand : bool = False):
+        self.base_weight = base_weight
+        self.norand = norand
+    
+
+
 #ignore this thing ig
 #randomize prompts in this table
 class RandTable:
@@ -11,8 +21,7 @@ class RandTable:
         """
         self.elements = elements
         self.elements_n = elements_n
-        self.base_weight = def_weight
-        self.norand = lock_weights
+        self.traits = ElementTraits(def_weight, lock_weights)
         
         return
     def get_rand_elements(self) -> list:
@@ -35,8 +44,7 @@ class LORA:
     #note that bundled tags inherit these
     def __init__(self, name : str, weight : float = None, norand : bool = True, bundled_tags : list = []):
         self.name = name
-        self.weight = weight
-        self.norand = norand
+        self.traits = ElementTraits(weight, norand)
         self.bundled_tags = bundled_tags
     #converts LORA to string
     #note that this does not affect the other stuff
@@ -54,6 +62,10 @@ class RandElement:
         if(random.random() < self.probability):
             return True
         return False
+    def get(self):
+        if(self.trigger()):
+            return self.element
+        return ""
 
 #most of these are just for type checking tbh
 class ElementBundle:
@@ -61,8 +73,7 @@ class ElementBundle:
         self.elements = elements
 
 
-    
-    
+
 
         
     

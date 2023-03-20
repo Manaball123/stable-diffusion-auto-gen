@@ -12,56 +12,56 @@ def rand_weight(base : float = cfg.base_weight) -> float:
 
 
 def create_weighted_tag(prompt : str, weight : float) -> str:
-    return "(" + prompt + ":" + str(weight) + "), "
+    #dont make it weighted if deviates too small from 1
+    if(weight < 0.99 or weight > 1.01):
+        return "(" + prompt + ":" + str(weight) + "), "
+    return prompt + ", "
+
+#disregards any default params
+def create_prompt_raw(prompt : str, weight : float, norand : bool) -> str:
+    if(not norand):
+        weight = rand_weight(weight)
+    return create_weighted_tag(prompt, weight)
+
+def get_override_traits(element : list) -> cfgutils.ElementTraits:
+    traits : cfgutils.ElementTraits = cfgutils.ElementTraits(cfg.base_weight, cfg.randomize_tag_weight)
+    if(isinstance(element, list)):
+        #if norand modifier
+        if(len(element) == 3):
+            traits.norand = True
+        traits.base_weight = element[1]
+    
+    #use default args if not list
+    return traits
+
+
 
 #pass in string OR prompt element(list)
-def create_prompt(prompt, base_weight : float = cfg.base_weight, norand_weights : bool = False) -> str:
+def create_prompt(prompt, traits : cfgutils.ElementTraits = None) -> str:
     
-    weight = 1.0
-    prompt_str = ""
-
-    #if prompt is a string
-    if(isinstance(prompt, str)):
-        #use a random weight
-        prompt_str = prompt
-    
-
-    
-    #if prompt is a prompt element
+    traits = get_override_traits(prompt)
+    p_str = prompt
     if(isinstance(prompt, list)):
-        prompt_str = prompt[0]
-        #if norand modifier
-        if(len(prompt) == 3 or norand_weights):
-            norand_weights = True
-            base_weight = prompt[1]
-    
-    #assert(len(prompt_str) != 0)
-    if(not norand_weights):
-        weight = rand_weight(base_weight)
-    else:
-        weight = base_weight
-    return create_weighted_tag(prompt_str, weight)
+        p_str = prompt[0]
 
-
-
+    return create_prompt_raw(p_str, traits.base_weight, traits.norand)
 
 
 def parse_LORA(lora_e : cfgutils.LORA) -> str:
     #check for overrides
-    if(lora_e.weight != None):
-            base_weight = lora_e.weight
-        
-    if(lora_e.norand != True):
-        weight = rand_weight(base_weight)
-    else:
+    base_weight = lora_e.traits.base_weight
+    
+    if(lora_e.traits.norand):
         weight = base_weight
+    else:
+        weight = rand_weight(base_weight)
     #generate lora prompt first
     out = lora_e.lora_tostr(weight)
     out += ", "
     for v in lora_e.bundled_tags:
-        out += create_prompt(v, base_weight, lora_e.norand)
+        out += parse_element(v, )
 
-        #out += create_prompt(v, base_weight, prompt.norand)
+
     return out
 
 def parse_RandTable(tab_e : cfgutils.RandTable) -> str:
@@ -70,8 +70,8 @@ def parse_RandTable(tab_e : cfgutils.RandTable) -> str:
         elements = tab_e.get_rand_elements()
         for v in elements:
             if(isinstance(v, str)):
-                elist : list = [v, tab_e.base_weight]
-                if(tab_e.norand):
+                elist : list = [v, tab_e.traits.base_weight]
+                if(tab_e.traits.norand):
                     elist.append(cfgutils.NORAND)
                 out += parse_element(elist)
                 continue
@@ -82,15 +82,16 @@ def parse_RandTable(tab_e : cfgutils.RandTable) -> str:
 
 
 #parses ANY element in the prompt list and returns string version
-def parse_element(element) -> str:
+def parse_element(element, traits : cfgutils.ElementTraits = None) -> str:
     #honestly i could customize weight randrange for randtables too but lazy
     
     if(isinstance(element, cfgutils.RandTable)):
+        #no trait inheritance
         return parse_RandTable(element)
     
     if(isinstance(element, cfgutils.RandElement)):
         if(element.trigger()):
-            return parse_element(element.element)
+            return parse_element(element.element, traits)
         return ""
     
     #if bundle
@@ -109,7 +110,7 @@ def parse_element(element) -> str:
         return parse_LORA(element)
 
     #else parse as normal
-    return create_prompt(element)
+    return create_prompt(element, traits)
 
     
 
