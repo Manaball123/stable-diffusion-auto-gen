@@ -69,14 +69,8 @@ def parse_RandTable(tab_e : cfgutils.RandTable) -> str:
         out : str = ""
         elements = tab_e.get_rand_elements()
         for v in elements:
-            if(isinstance(v, str)):
-                elist : list = [v, tab_e.traits.base_weight]
-                if(tab_e.traits.norand):
-                    elist.append(cfgutils.NORAND)
-                out += parse_element(elist)
-                continue
 
-            out += parse_element(v)
+            out += parse_element(v, tab_e.traits)
         return out
 
 
@@ -118,6 +112,8 @@ def gen_seed() -> int:
     #2^63 - 1
     return random.randint(0,9223372036854775808)
 
+#creates the dir only if the directory doesnt exist yet
+#os.mkdir doesn't work if the dir already does
 def mkdir_if_not_exist(dir : str):
     if(not os.path.isdir(dir)):
         os.mkdir(dir)

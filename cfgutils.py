@@ -42,16 +42,24 @@ class UnmodifiedList:
 #Note that you can put this inside a rand table
 class LORA:
     #note that bundled tags inherit these
-    def __init__(self, name : str, weight : float = None, norand : bool = True, bundled_tags : list = []):
+    def __init__(self, name : str, weight : float = None, norand : bool = True, bundled_tags : list = [], indiv_layer : list = None):
         self.name = name
         self.traits = ElementTraits(weight, norand)
         self.bundled_tags = bundled_tags
-    #converts LORA to string
-    #note that this does not affect the other stuff
+        self.indiv_layers = indiv_layer
+    #converts LORA to string representation(i.e. <lora:ur_lora_name:weight>)
+    #note that this does NOT include the bundled tags
     def lora_tostr(self, weight : float) -> str:
         if(weight == None):
             weight = 1.0
-        return "<lora:" + self.name + ":" + str(weight) + ">"
+        out = "<lora:" + self.name + ":" + str(weight)
+        if(self.indiv_layers != None):
+            out += ":"
+            for v in self.indiv_layers:
+                out += str(v)
+                out += ","
+            out = out[:-1]
+        return out + ">"
 
 #element that has a random chance to appear
 class RandElement:
